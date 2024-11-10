@@ -1,0 +1,57 @@
+Table invoice {
+  id integer [primary key]
+  client_id integer [not null, ref: > clients.id]
+  
+  title text
+  markup integer [default: 0]
+  discount money
+  notes text
+  created_at timestamp [default: "CURRENT_TIMESTAMP"]
+}
+
+Table clients {
+  id integer [primary key]
+  
+  title text
+  registrationCode text [unique]
+  vat text
+  
+  // Composite attribute represented by related fields
+  address_street text
+  address_city text
+  address_zip_code text
+  
+  email text [unique]
+  phoneNumber text
+}
+
+Table products {
+  id integer [primary key]
+  
+  title text
+  price integer
+  availableQuantity integer
+}
+
+Table invoice_products {
+  id integer [primary key]
+
+  // Relationship attributes
+  invoice_id integer [ref: > invoice.id]
+  product_id integer [ref: > products.id]
+
+  title text
+  price integer
+  quantity integer
+  
+  total_price integer // Attribute for relationship aspect
+}
+
+Table payments {
+  id integer [primary key]
+  
+  invoice_id integer [not null, ref: > invoice.id] // Weak relationship to invoice
+  amount money
+  payment_date timestamp
+  method text
+}
