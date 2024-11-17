@@ -1,4 +1,4 @@
-Table invoice {
+Table invoices {
   id integer [primary key]
   client_id integer [not null, ref: > clients.id]
   
@@ -37,7 +37,7 @@ Table invoice_products {
   id integer [primary key]
 
   // Relationship attributes
-  invoice_id integer [ref: > invoice.id]
+  invoice_id integer [ref: > invoices.id]
   product_id integer [ref: > products.id]
 
   title text
@@ -50,7 +50,7 @@ Table invoice_products {
 Table payments {
   id integer [primary key]
   
-  invoice_id integer [not null, ref: > invoice.id] // Weak relationship to invoice
+  invoice_id integer [not null, ref: > invoices.id] // Weak relationship to invoice
   amount money
   payment_date timestamp
   method text
