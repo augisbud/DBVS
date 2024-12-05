@@ -184,6 +184,52 @@ BEFORE INSERT ON "Payments"
 FOR EACH ROW
 EXECUTE FUNCTION prevent_overpayment();
 
+CREATE OR REPLACE FUNCTION prevent_modification_if_paid()
+RETURNS TRIGGER AS $$
+DECLARE
+    payment_exists BOOLEAN;
+    invoice_id INTEGER;
+BEGIN
+    IF TG_TABLE_NAME = 'Invoices' THEN
+        invoice_id := NEW."Id";
+    ELSIF TG_TABLE_NAME = 'InvoiceProducts' THEN
+        invoice_id := COALESCE(NEW."InvoiceId", OLD."InvoiceId");
+    ELSE
+        RAISE EXCEPTION 'Unexpected table: %', TG_TABLE_NAME;
+    END IF;
+
+    SELECT EXISTS (
+        SELECT 1 FROM "Payments" WHERE "InvoiceId" = invoice_id
+    ) INTO payment_exists;
+
+    IF payment_exists THEN
+        RAISE EXCEPTION 'Negalima keisti jau apmokėtos sąskaitos.';
+    END IF;
+
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_prevent_invoice_update_if_paid
+BEFORE UPDATE ON "Invoices"
+FOR EACH ROW
+EXECUTE FUNCTION prevent_modification_if_paid();
+
+CREATE TRIGGER trg_prevent_invoice_products_insert_if_paid
+BEFORE INSERT ON "InvoiceProducts"
+FOR EACH ROW
+EXECUTE FUNCTION prevent_modification_if_paid();
+
+CREATE TRIGGER trg_prevent_invoice_products_update_if_paid
+BEFORE UPDATE ON "InvoiceProducts"
+FOR EACH ROW
+EXECUTE FUNCTION prevent_modification_if_paid();
+
+CREATE TRIGGER trg_prevent_invoice_products_delete_if_paid
+BEFORE DELETE ON "InvoiceProducts"
+FOR EACH ROW
+EXECUTE FUNCTION prevent_modification_if_paid();
+
 COMMIT;
 
 START TRANSACTION;
@@ -212,7 +258,7 @@ VALUES
 
 INSERT INTO "Payments" ("Amount", "Method", "InvoiceId")
 VALUES
-    (195.00::money, 'Credit Card', 1),
-    (610.00::money, 'Postalu', 2);
+    (10.00::money, 'Credit Card', 1),
+    (10.00::money, 'Bank Transfer', 2);
 
 COMMIT;
