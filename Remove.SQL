@@ -3,11 +3,16 @@ START TRANSACTION;
 DROP TRIGGER IF EXISTS trg_refresh_materialized_product_sales ON "InvoiceProducts";
 DROP TRIGGER IF EXISTS trg_update_product_quantity ON "InvoiceProducts";
 DROP TRIGGER IF EXISTS trg_prevent_overpayment ON "Payments";
+DROP TRIGGER IF EXISTS trg_prevent_invoice_update_if_paid ON "Invoices";
+DROP TRIGGER IF EXISTS trg_prevent_invoice_products_insert_if_paid ON "InvoiceProducts";
+DROP TRIGGER IF EXISTS trg_prevent_invoice_products_update_if_paid ON "InvoiceProducts";
+DROP TRIGGER IF EXISTS trg_prevent_invoice_products_delete_if_paid ON "InvoiceProducts";
 
 DROP FUNCTION IF EXISTS refresh_materialized_product_sales();
 DROP FUNCTION IF EXISTS trigger_refresh_materialized_product_sales();
 DROP FUNCTION IF EXISTS update_product_quantity();
 DROP FUNCTION IF EXISTS prevent_overpayment();
+DROP FUNCTION IF EXISTS prevent_modification_if_paid();
 
 DROP MATERIALIZED VIEW IF EXISTS "MaterializedProductSales";
 
